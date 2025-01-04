@@ -56,7 +56,7 @@ module BreadCrumbs
                     "@type": "ListItem",
                     "position": index + 1,
                     "name": crumb[:title],
-                    "item": crumb[:url]
+                    "item": to_absolute_url(crumb[:url])
                     }
                 end
             }
@@ -67,9 +67,12 @@ module BreadCrumbs
                 "@type": "WebPage",
                 "name": page_info[:title] || "",
                 "description": page_info[:description] || "",
-                "url": page_info[:url] || request.original_url
+                "url": to_absolute_url(page_info[:url] || request.original_url)
             }.compact
         end
+        def to_absolute_url(relative_url)
+            URI.join(request.base_url, relative_url).to_s
+        end        
         def render_ld_json(ld_json_data)
             content_tag(:script, type: "application/ld+json") do
                 ld_json_data.to_json.html_safe
