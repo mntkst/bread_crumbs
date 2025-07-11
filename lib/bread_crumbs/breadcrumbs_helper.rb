@@ -18,22 +18,16 @@ module BreadCrumbs
 
                 # 構造化データ用パンくずリスト
                 breadcrumbs_data << generate_ld_json_breadcrumbs(category, breadcrumbs)
-            end
-  
-            # WebPageの構造化データを生成
-            page_data = generate_ld_json_web_page(options[:page_info] || {})           
-             
-
+            end               
             # 全体を囲む要素でラップして返す
-            render_breadcrumbs_wrapper(breadcrumbs_html, breadcrumbs_data, page_data, options)
+            render_breadcrumbs_wrapper(breadcrumbs_html, breadcrumbs_data, options)
         end        
         private
   
-        def render_breadcrumbs_wrapper(breadcrumbs_html, breadcrumbs_data, page_data, options)
+        def render_breadcrumbs_wrapper(breadcrumbs_html, breadcrumbs_data, options)
             content_tag(:div, class: options[:wrapper_class] || 'breadcrumbs-wrapper') do
                 breadcrumbs_html.join("\n").html_safe +
-                render_ld_json(breadcrumbs_data) +
-                render_ld_json([page_data])
+                render_ld_json(breadcrumbs_data)
             end
         end        
         def render_breadcrumbs_for_category(breadcrumbs, nav_class, separator)
@@ -61,15 +55,6 @@ module BreadCrumbs
                 end
             }
         end        
-        def generate_ld_json_web_page(page_info)
-            {
-                "@context": "https://schema.org",
-                "@type": "WebPage",
-                "name": page_info[:title] || "",
-                "description": page_info[:description] || "",
-                "url": to_absolute_url(page_info[:url] || request.original_url)
-            }.compact
-        end
         def to_absolute_url(relative_url)
             URI.join(request.base_url, relative_url).to_s
         end        
