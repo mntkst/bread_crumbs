@@ -7,7 +7,7 @@ module BreadCrumbs
             return ''.html_safe if categories_with_keys.nil? || categories_with_keys.empty?
   
             breadcrumbs_html = []
-            breadcrumbs_data = []
+            breadcrumbs_data = nil
   
             # 各カテゴリごとのパンくずリストと構造化データを生成
             categories_with_keys.each do |category, key|
@@ -16,8 +16,8 @@ module BreadCrumbs
                 # HTML用パンくずリスト
                 breadcrumbs_html << render_breadcrumbs_for_category(breadcrumbs, options[:class] || 'breadcrumbs', options[:separator] || ' 》 ')
 
-                # 構造化データ用パンくずリスト
-                breadcrumbs_data << generate_ld_json_breadcrumbs(category, breadcrumbs)
+                # 構造化データ用パンくずリスト(ld+jsonには1セットしか推奨されないため最初の1セットだけを表示)
+                breadcrumbs_data = generate_ld_json_breadcrumbs(breadcrumbs) if breadcrumbs_data.nil?
             end               
             # 全体を囲む要素でラップして返す
             render_breadcrumbs_wrapper(breadcrumbs_html, breadcrumbs_data, options)
@@ -38,13 +38,12 @@ module BreadCrumbs
             end
         end
 
-        def generate_ld_json_breadcrumbs(category, breadcrumbs)
+        def generate_ld_json_breadcrumbs(breadcrumbs)
             list = BreadCrumbs::List.instance
 
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",
-                "name": list.category_name(category),
                 "itemListElement": breadcrumbs.each_with_index.map do |crumb, index|
                     {
                     "@type": "ListItem",
